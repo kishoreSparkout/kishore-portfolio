@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kishore S — Frontend Developer</title>
+<meta name="description" content="Kishore S — Frontend Developer. React.js, Next.js, Tailwind CSS, and SEO-optimized, mobile-first interfaces.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1e1e1e;
+    --bg-elevated:#252526;
+    --bg-sidebar:#1b1b1b;
+    --bg-input:#2d2d2d;
+    --bg-hover:#2a2d2e;
+    --border:#3c3c3c;
+    --border-soft:#2d2d2d;
+
+    --blue:#3B82F6;
+--blue-bright:#60A5FA;
+
+--comment:#94A3B8;      /* Better than green */
+--green-status:#22C55E;
+
+--text:#E5E7EB;
+--text-bright:#FFFFFF;
+--text-muted:#9CA3AF;
+
+    --kw:#569cd6;      /* keyword */
+    --func:#dcdcaa;    /* function/label */
+    --str:#ce9178;     /* string */
+    --num:#b5cea8;     /* number */
+    --tag:#c586c0;     /* tag/control */
+    --var:#9cdcfe;     /* variable/property */
+
+    --amber:#e2c08d;
+    --text-dim:#5a5a5a;
+
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --ui:'Inter', -apple-system, sans-serif;
+
+    --activitybar-w:48px;
+    --sidebar-w:260px;
+    --tabbar-h:36px;
+    --statusbar-h:26px;
+    --titlebar-h:34px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *,*::before,*::after{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--ui);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.65;
+    font-size:14.5px;
+  }
+  a{ color:inherit; }
+  ::selection{ background:rgba(0,122,204,0.45); color:#fff; }
+  a:focus-visible, button:focus-visible, .navfile:focus-visible{
+    outline:1px solid var(--blue-bright); outline-offset:2px;
+  }
+
+  /* ================= Title bar ================= */
+  .titlebar{
+    height:var(--titlebar-h);
+    background:var(--bg-sidebar);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    position:sticky; top:0; z-index:200;
+    font-family:"Space Grotesk",sans-serif;font-size:12px; color:var(--text-muted);
+  }
+  .titlebar .dots{ position:absolute; left:14px; display:flex; gap:7px; }
+  .titlebar .dots i{ width:11px; height:11px; border-radius:50%; display:block; }
+  .titlebar .dots i:nth-child(1){ background:#ff5f57; }
+  .titlebar .dots i:nth-child(2){ background:#febc2e; }
+  .titlebar .dots i:nth-child(3){ background:#28c840; }
+  .titlebar .path{ display:flex; align-items:center; gap:6px; }
+  .titlebar .path b{ color:var(--text); font-weight:600; }
+  .titlebar .menu{ position:absolute; right:14px; display:flex; gap:16px; font-size:11px; }
+  .titlebar .menu span{ display:none; }
+  @media (min-width:860px){ .titlebar .menu span{ display:inline; } }
+
+  /* ================= IDE shell ================= */
+  .ide{ display:flex; min-height:calc(100vh - var(--titlebar-h) - var(--statusbar-h)); }
+
+  /* Activity bar */
+  .activitybar{
+    width:var(--activitybar-w); flex-shrink:0;
+    background:var(--bg-sidebar);
+    border-right:1px solid var(--border);
+    display:flex; flex-direction:column; align-items:center;
+    padding:14px 0; gap:22px;
+    position:sticky; top:var(--titlebar-h); height:calc(100vh - var(--titlebar-h) - var(--statusbar-h));
+  }
+  .activitybar button{
+    background:none; border:none; color:var(--text-muted); cursor:pointer;
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+    font-size:17px; border-left:2px solid transparent; padding:0;
+  }
+  .activitybar button.active{ color:var(--text-bright); border-left-color:var(--blue-bright); }
+  .activitybar button:hover{ color:var(--text-bright); }
+  .activitybar .spacer{ flex:1; }
+
+  /* Sidebar / explorer */
+  .sidebar{
+    width:var(--sidebar-w); flex-shrink:0;
+    background:var(--bg-sidebar);
+    border-right:1px solid var(--border);
+    position:sticky; top:var(--titlebar-h); height:calc(100vh - var(--titlebar-h) - var(--statusbar-h));
+    overflow-y:auto;
+    padding:16px 0 20px;
+  }
+  .sidebar-title{
+    font-family:var(--ui); font-size:11px; letter-spacing:0.08em; font-weight:700;
+    color:var(--text-muted); padding:0 18px 10px; text-transform:uppercase;
+  }
+  .tree-root{
+    font-family:var(--ui); font-size:12.5px; font-weight:700; color:var(--text);
+    padding:4px 10px 6px 18px; display:flex; align-items:center; gap:6px;
+  }
+  .tree{ list-style:none; margin:0; padding:0; }
+  .tree li{ margin:0; }
+  .navfile{
+    display:flex; align-items:center; gap:8px;
+    padding:5px 10px 5px 34px; font-family:"Space Grotesk",sans-serif;font-size:12.5px;
+    color:var(--text-muted); text-decoration:none; cursor:pointer;
+    border-left:2px solid transparent; white-space:nowrap;
+  }
+  .navfile:hover{ background:var(--bg-hover); color:var(--text); }
+  .navfile.active{ background:#04395e; color:#fff; border-left-color:var(--blue-bright); }
+  .navfile .ico{ width:14px; text-align:center; flex-shrink:0; font-size:12px; }
+  .ico.md{ color:var(--blue-bright); }
+  .ico.json{ color:var(--func); }
+  .ico.folder{ color:var(--amber); }
+  .ico.jsx{ color:#61dafb; }
+  .ico.css{ color:#42a5f5; }
+  .ico.yaml{ color:var(--tag); }
+  .ico.txt{ color:var(--text-muted); }
+  .ico.sh{ color:var(--green-status); }
+  .subtree .navfile{ padding-left:52px; }
+
+  .sidebar-toggle{ display:none; }
+
+  /* ================= Editor group ================= */
+  .editor-group{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  .tabbar{
+    height:var(--tabbar-h); flex-shrink:0;
+    display:flex; overflow-x:auto; background:var(--bg-sidebar);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:var(--titlebar-h); z-index:50;
+    scrollbar-width:none;
+  }
+  .tabbar::-webkit-scrollbar{ display:none; }
+  .tab{
+    font-family:"Space Grotesk",sans-serif;font-size:12.5px; color:var(--text-muted);
+    background:var(--bg-sidebar); border-right:1px solid var(--border);
+    padding:0 14px; height:100%; display:flex; align-items:center; gap:7px;
+    cursor:pointer; white-space:nowrap; text-decoration:none; flex-shrink:0;
+    border-top:2px solid transparent;
+  }
+  .tab.active{ background:var(--bg); color:var(--text-bright); border-top-color:var(--blue-bright); }
+  .tab .dot{ width:6px; height:6px; border-radius:50%; background:var(--text-dim); }
+  .tab.active .dot{ background:var(--blue-bright); }
+
+  .breadcrumb{
+    font-family:"Space Grotesk",sans-serif;font-size:11px; color:var(--text-dim);
+    padding:8px 28px 0;
+  }
+  .breadcrumb b{ color:var(--text-muted); font-weight:500; }
+
+  .editor-scroll{ flex:1; }
+
+  .wrap{ max-width:900px; margin:0 auto; padding:0 28px; }
+  .wrap-wide{ max-width:1120px; margin:0 auto; padding:0 28px; }
+
+  /* code-style section shell */
+  .code-section{ padding:52px 0 20px; border-bottom:1px solid var(--border-soft); counter-reset:line; }
+  .code-section:last-of-type{ border-bottom:none; }
+  .line{
+    counter-increment:line;
+    display:flex; gap:22px; padding:2px 0;
+  }
+  .line::before{
+    content:counter(line);
+    font-family:"Space Grotesk",sans-serif;font-size:12px; color:var(--text-dim);
+    min-width:22px; text-align:right; flex-shrink:0; padding-top:2px; user-select:none;
+  }
+  .line-content{ min-width:0; flex:1; }
+  .line.indent .line-content{ padding-left:22px; }
+  .line.indent2 .line-content{ padding-left:44px; }
+  .line-empty::before{ content:""; }
+
+  .kw{ color:var(--kw); font-family:"Space Grotesk",sans-serif;}
+  .func{ color:var(--func); font-family:"Space Grotesk",sans-serif;}
+  .str{ color:var(--str); font-family:"Space Grotesk",sans-serif;}
+  .cm{ color:var(--comment); font-family:"Space Grotesk",sans-serif;font-style:italic; }
+  .numv{ color:var(--num); font-family:"Space Grotesk",sans-serif;}
+  .tagv{ color:var(--tag); font-family:"Space Grotesk",sans-serif;}
+  .varv{ color:var(--var); font-family:"Space Grotesk",sans-serif;}
+  .punct{ color:var(--text-muted); font-family:"Space Grotesk",sans-serif;}
+  .prose{ color:var(--text); font-size:15px; font-family:var(--ui); }
+  .prose a{ color:var(--blue-bright); text-decoration:none; border-bottom:1px solid rgba(79,193,255,0.35); }
+  .prose a:hover{ border-color:var(--blue-bright); }
+
+  h2.filehead{
+    font-family:"Space Grotesk",sans-serif;font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--blue-bright); margin:0 0 26px; display:flex; align-items:center; gap:10px;
+  }
+  h2.filehead::before{ content:"//"; color:var(--comment); }
+
+  /* ---- Hero (about.md as editor content) ---- */
+  .hero-name{ font-family:"Space Grotesk",sans-serif;font-weight:800; font-size:clamp(30px,5.4vw,54px); color:var(--text-bright); line-height:1.08; margin:0; }
+  .hero-name .accent{ color:var(--blue-bright); }
+  .hero-role{ font-family:"Space Grotesk",sans-serif;font-size:15px; color:var(--func); margin-top:10px; }
+  .hero-role .kw{ margin-right:2px; }
+  .typewriter{
+    font-family:"Space Grotesk",sans-serif;font-size:13.5px; color:var(--comment); margin:22px 0 0;
+    border-left:2px solid var(--border); padding-left:14px;
+  }
+  .typewriter .caret{ display:inline-block; width:7px; height:15px; background:var(--blue-bright); margin-left:2px; vertical-align:-2px; animation:blink 1s step-end infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .hero-tags{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 30px; }
+  .tag{
+    font-family:"Space Grotesk",sans-serif;font-size:11.5px; color:var(--var);
+    background:var(--bg-input); border:1px solid var(--border);
+    padding:4px 10px; border-radius:3px;
+  }
+  .cta-row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:44px; }
+  .btn{
+    font-family:"Space Grotesk",sans-serif;font-size:13px; text-decoration:none; padding:10px 18px;
+    border-radius:3px; display:inline-flex; align-items:center; gap:8px; border:1px solid transparent; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn-primary{ background:var(--blue); color:#fff; font-weight:600; }
+  .btn-primary:hover{ background:#0894e6; transform:translateY(-1px); }
+  .btn-ghost{ border-color:var(--border); color:var(--text); background:var(--bg-input); }
+  .btn-ghost:hover{ border-color:var(--blue-bright); color:var(--blue-bright); }
+
+  /* stats strip, LeetCode-profile style */
+  .stats-strip{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--border); border:1px solid var(--border); border-radius:4px; overflow:hidden;
+    margin-bottom:8px;
+  }
+  .stat{ background:var(--bg-elevated); padding:16px 14px; }
+  .stat .sv{ font-family:"Space Grotesk",sans-serif;font-weight:700; font-size:24px; color:var(--text-bright); }
+  .stat .sv .unit{ font-size:13px; color:var(--text-muted); font-weight:500; }
+  .stat .sl{ font-family:"Space Grotesk",sans-serif;font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+  .stat.ok .sv{ color:var(--green-status); }
+
+  /* ---- Experience (json) ---- */
+  .exp-card{ background:var(--bg-elevated); border:1px solid var(--border); border-radius:5px; padding:22px 24px; margin:6px 0 30px; }
+  .commit-list{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .commit-list li{ display:flex; gap:10px; font-size:14px; color:var(--text); align-items:flex-start; }
+  .commit-list li::before{ content:"+"; color:var(--green-status); font-family:"Space Grotesk",sans-serif;font-weight:700; flex-shrink:0; }
+
+  /* ---- Projects (CodePen-style pens) ---- */
+  .pen-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+  .pen{
+    border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--bg-elevated);
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .pen:hover{ border-color:var(--blue); transform:translateY(-3px); }
+  .pen-preview{
+    height:130px; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pen-preview .browser-dots{ position:absolute; top:10px; left:12px; display:flex; gap:5px; z-index:2; }
+  .pen-preview .browser-dots i{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.55); display:block; }
+  .pen-preview .glyph{ font-family:"Space Grotesk",sans-serif;font-weight:800; font-size:42px; color:rgba(255,255,255,0.92); letter-spacing:-0.02em; z-index:2; }
+  .pen-preview::after{ content:""; position:absolute; inset:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 10px); }
+
+  .pen-body{ padding:16px 18px 18px; }
+  .pen-toprow{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .pen-title{ font-weight:700; font-size:16px; color:var(--text-bright); }
+  .pen-type{ font-family:"Space Grotesk",sans-serif;font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; letter-spacing:0.03em; white-space:nowrap; }
+
+  .pen-tabs{ display:flex; gap:4px; margin:12px 0 12px; border-bottom:1px solid var(--border); }
+  .pen-tabbtn{
+    font-family:"Space Grotesk",sans-serif;font-size:11px; color:var(--text-muted); background:none; border:none;
+    padding:6px 10px; cursor:pointer; border-bottom:2px solid transparent;
+  }
+  .pen-tabbtn.active{ color:var(--blue-bright); border-color:var(--blue-bright); }
+  .pen-panel{ display:none; }
+  .pen-panel.active{ display:block; }
+  .pen-panel ul{ margin:0; padding-left:16px; color:var(--text-muted); font-size:13.5px; display:flex; flex-direction:column; gap:6px; }
+  .pen-panel ul li::marker{ color:var(--blue-bright); }
+  .pen-stack{ display:flex; flex-wrap:wrap; gap:6px; }
+  .chip{ font-family:"Space Grotesk",sans-serif;font-size:10.5px; color:var(--var); background:var(--bg-input); border:1px solid var(--border); padding:3px 8px; border-radius:3px; }
+
+  .pen-footer{ display:flex; gap:10px; margin-top:14px; }
+  .pen-link{
+    font-family:"Space Grotesk",sans-serif;font-size:11.5px; color:var(--text-muted); text-decoration:none;
+    border:1px solid var(--border); padding:6px 11px; border-radius:3px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .pen-link:hover{ color:var(--blue-bright); border-color:var(--blue-bright); }
+  .pen-link.disabled{ opacity:0.4; pointer-events:none; }
+
+  /* ---- Skills (css vars) ---- */
+  .skills-card{ background:var(--bg-elevated); border:1px solid var(--border); border-radius:5px; padding:24px 26px; }
+  .skill-row{ display:flex; gap:10px; padding:6px 0; flex-wrap:wrap; align-items:baseline; }
+  .skill-row .sel{ color:var(--kw); font-family:"Space Grotesk",sans-serif;font-size:13.5px; min-width:150px; }
+
+  /* ---- Awards (yaml) ---- */
+  .award-block{ margin-bottom:22px; }
+  .award-title{ color:var(--str); font-family:"Space Grotesk",sans-serif;font-weight:600; }
+  .award-badge{ display:inline-flex; align-items:center; gap:6px; font-family:"Space Grotesk",sans-serif;font-size:11px; color:var(--bg); background:var(--amber); padding:2px 9px; border-radius:3px; font-weight:700; margin-left:8px; }
+
+  /* ---- Education ---- */
+  .edu-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:5px; padding:20px 22px; }
+  .edu-degree{ font-weight:700; color:var(--text-bright); }
+  .edu-school{ color:var(--text-muted); font-size:13.5px; margin-top:4px; }
+  .edu-year{ font-family:"Space Grotesk",sans-serif;color:var(--blue-bright); font-size:12.5px; }
+
+  /* ---- Contact (sh terminal) ---- */
+  .terminal-box{ background:#0c0c0c; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .term-bar{ display:flex; align-items:center; gap:8px; padding:9px 14px; background:var(--bg-sidebar); border-bottom:1px solid var(--border); color:var(--text-dim); font-family:"Space Grotesk",sans-serif;font-size:11px; }
+  .term-body{ padding:20px 22px 24px; font-family:"Space Grotesk",sans-serif;font-size:13.5px; }
+  .term-out-line{ margin:8px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .term-out-line .k{ color:var(--var); }
+  .term-out-line .v{ color:var(--str); }
+  .copy-btn{
+    font-family:"Space Grotesk",sans-serif;font-size:11px; color:var(--text-muted); background:var(--bg-input);
+    border:1px solid var(--border); border-radius:3px; padding:2px 8px; cursor:pointer;
+  }
+  .copy-btn:hover{ color:var(--blue-bright); border-color:var(--blue-bright); }
+  .copied-note{ font-family:"Space Grotesk",sans-serif;font-size:11px; color:var(--green-status); opacity:0; transition:opacity .2s ease; }
+  .copied-note.show{ opacity:1; }
+  .contact-links{ display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+
+  footer.foot{ padding:36px 0 60px; text-align:center; }
+  .foot p{ font-family:"Space Grotesk",sans-serif;font-size:11.5px; color:var(--text-dim); }
+
+  /* ================= Status bar ================= */
+  .statusbar{
+    height:var(--statusbar-h); background:var(--blue); color:#fff;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 14px; font-family:"Space Grotesk",sans-serif;font-size:11px;
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+  }
+  .statusbar .sb-left, .statusbar .sb-right{ display:flex; align-items:center; gap:16px; }
+  .statusbar .sb-item{ display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .statusbar .pulse{ width:7px; height:7px; border-radius:50%; background:var(--green-status); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.35; } }
+  .sb-hide-mobile{ display:none; }
+  @media (min-width:640px){ .sb-hide-mobile{ display:flex; } }
+
+  /* ================= Responsive ================= */
+  @media (max-width:960px){
+    .pen-grid{ grid-template-columns:1fr; }
+    .stats-strip{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:820px){
+    .sidebar{ position:fixed; left:calc(-1 * var(--sidebar-w)); top:var(--titlebar-h); height:calc(100vh - var(--titlebar-h)); z-index:150; transition:left .22s ease; box-shadow:20px 0 40px rgba(0,0,0,0.4); }
+    .sidebar.open{ left:var(--activitybar-w); }
+    .sidebar-toggle{ display:flex; }
+    .activitybar{ position:sticky; }
+  }
+  @media (max-width:560px){
+    body{ font-size:13.5px; }
+    .wrap, .wrap-wide{ padding:0 18px; }
+    .line{ gap:14px; }
+    .line::before{ min-width:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="dots"><i></i><i></i><i></i></div>
+  <div class="path"><span>kishore-s-portfolio</span><span>—</span><b>about.md</b></div>
+  <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Go</span></div>
+</div>
+
+<div class="ide">
+  <div class="activitybar">
+    <button class="active sidebar-toggle" id="sidebarToggle" aria-label="Toggle explorer" aria-expanded="false" title="Explorer">📁</button>
+    <button class="active" id="explorerBtn" title="Explorer" style="display:none;">📁</button>
+    <button title="Search">🔍</button>
+    <button title="Source Control">⑂</button>
+    <button title="Run">▷</button>
+    <div class="spacer"></div>
+    <button title="Account">◍</button>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-title">Explorer</div>
+    <div class="tree-root"><span class="ico folder">▾</span> KISHORE-S-PORTFOLIO</div>
+    <ul class="tree">
+      <li><a class="navfile" data-target="about" href="#about"><span class="ico md">◆</span>about.md</a></li>
+      <li><a class="navfile" data-target="experience" href="#experience"><span class="ico json">{ }</span>experience.json</a></li>
+      <li>
+        <div class="navfile" style="cursor:default;"><span class="ico folder">▾</span>projects/</div>
+        <ul class="subtree">
+          <li><a class="navfile" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>aoc-website.jsx</a></li>
+          <li><a class="navfile" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>unifi-website.jsx</a></li>
+          <li><a class="navfile" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>gift-a-bottle.html</a></li>
+          <li><a class="navfile" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>sparkout-website.js</a></li>
+          <li><a class="navfile" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>blockchainx.js</a></li>
+        </ul>
+      </li>
+      <li><a class="navfile" data-target="skills" href="#skills"><span class="ico css">#</span>skills.css</a></li>
+      <li><a class="navfile" data-target="awards" href="#awards"><span class="ico yaml">≡</span>awards.yaml</a></li>
+      <li><a class="navfile" data-target="education" href="#education"><span class="ico txt">≣</span>education.txt</a></li>
+      <li><a class="navfile" data-target="contact" href="#contact"><span class="ico sh">$</span>contact.sh</a></li>
+    </ul>
+  </aside>
+
+  <div class="editor-group">
+    <div class="tabbar" id="tabbar">
+      <a class="tab" data-target="about" href="#about"><span class="ico md">◆</span>about.md<span class="dot"></span></a>
+      <a class="tab" data-target="experience" href="#experience"><span class="ico json">{ }</span>experience.json<span class="dot"></span></a>
+      <a class="tab" data-target="projects" href="#projects"><span class="ico jsx">⬢</span>projects<span class="dot"></span></a>
+      <a class="tab" data-target="skills" href="#skills"><span class="ico css">#</span>skills.css<span class="dot"></span></a>
+      <a class="tab" data-target="awards" href="#awards"><span class="ico yaml">≡</span>awards.yaml<span class="dot"></span></a>
+      <a class="tab" data-target="contact" href="#contact"><span class="ico sh">$</span>contact.sh<span class="dot"></span></a>
+    </div>
+
+    <div class="editor-scroll" id="editorScroll">
+
+      <!-- ABOUT -->
+      <section id="about" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › about.md</div>
+        <div style="padding-top:34px;">
+          <p class="hero-name">Kishore S <span class="accent">/frontend/</span></p>
+          <p class="hero-role"><span class="kw">const</span> <span class="varv">role</span> <span class="punct">=</span> <span class="str">"Frontend Developer"</span><span class="punct">;</span></p>
+          <p class="typewriter" id="typewriter"></p>
+
+          <div class="hero-tags">
+            <span class="tag">React.js</span>
+            <span class="tag">Next.js</span>
+            <span class="tag">Tailwind CSS</span>
+            <span class="tag">SEO Optimization</span>
+            <span class="tag">Responsive Design</span>
+          </div>
+
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#projects">View Projects</a>
+            <a class="btn btn-ghost" href="#contact">Contact Me</a>
+          </div>
+
+          <div class="stats-strip">
+            <div class="stat"><div class="sv">05</div><div class="sl">Projects Shipped</div></div>
+            <div class="stat"><div class="sv">1.3<span class="unit">yrs</span></div><div class="sl">Experience</div></div>
+            <div class="stat"><div class="sv">02</div><div class="sl">Awards Won</div></div>
+            <div class="stat ok"><div class="sv">●</div><div class="sl">Open to Work</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:44px;">
+          <div class="line"><div class="line-content prose"><span class="cm">## Summary</span></div></div>
+          <div class="line-empty"><div class="line-content"></div></div>
+          <div class="line"><div class="line-content prose">Passionate Frontend Developer with 1.3+ years of experience building fast, scalable, and responsive web applications. Specialized in React.js, Next.js, Tailwind CSS, SEO optimization, and modern UI development with a strong focus on performance and clean user experiences.</div></div>
+          <div class="line-empty"><div class="line-content"></div></div>
+          <div class="line"><div class="line-content prose">Currently contributing to production-grade interfaces at <strong style="color:var(--text-bright)">Sparkout Tech Solutions</strong>, recognized as <strong style="color:var(--amber)">Employee of the Quarter</strong>. Passionate about writing clean, maintainable code and delivering seamless, user-centric experiences.</div></div>
+          <!-- <div class="line-empty"><div class="line-content"></div></div>
+          <div class="line"><div class="line-content prose"><span class="cm">## Contact</span></div></div>
+          <div class="line-empty"><div class="line-content"></div></div>
+          <div class="line"><div class="line-content prose">📍 Tiruppur, Tamil Nadu, India &nbsp;·&nbsp; ✆ <a href="tel:+919344031277">+91 9344031277</a> &nbsp;·&nbsp; ✉ <a href="mailto:kishore55440@gmail.com">kishore55440@gmail.com</a></div></div>
+          <div class="line"><div class="line-content prose">🔗 <a href="https://www.linkedin.com/in/kishore8" target="_blank" rel="noopener">linkedin.com/in/kishore8</a> &nbsp;·&nbsp; <a href="https://github.com/kishoreSparkout" target="_blank" rel="noopener">github.com/kishoreSparkout</a></div></div>
+          <div class="line"><div class="line-content prose">🗣 English, Tamil</div></div> -->
+        </div>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section id="experience" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › experience.json</div>
+        <h2 class="filehead" style="margin-top:34px;">work_experience</h2>
+
+        <div class="line"><div class="line-content"><span class="punct">[</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="punct">{</span></div></div>
+        <div class="line indent2"><div class="line-content"><span class="varv">"role"</span><span class="punct">:</span> <span class="str">"Junior Software Developer (Frontend)"</span><span class="punct">,</span></div></div>
+        <div class="line indent2"><div class="line-content"><span class="varv">"company"</span><span class="punct">:</span> <span class="str">"Sparkout Tech Solutions"</span><span class="punct">,</span></div></div>
+        <div class="line indent2"><div class="line-content"><span class="varv">"location"</span><span class="punct">:</span> <span class="str">"Coimbatore, Tamil Nadu"</span><span class="punct">,</span></div></div>
+        <div class="line indent2"><div class="line-content"><span class="varv">"period"</span><span class="punct">:</span> <span class="str">"March 2025 — Present"</span><span class="punct">,</span></div></div>
+        <div class="line indent2"><div class="line-content"><span class="varv">"status"</span><span class="punct">:</span> <span class="kw">true</span> <span class="cm">// current role</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="punct">}</span></div></div>
+        <div class="line"><div class="line-content"><span class="punct">]</span></div></div>
+
+        <div class="exp-card">
+          <p class="cm" style="margin:0 0 4px;">// highlights.map(h =&gt; h.description)</p>
+          <ul class="commit-list">
+            <li>Developed responsive landing pages using HTML5, CSS3, Bootstrap, Tailwind CSS, JavaScript, React.js, and Next.js.</li>
+            <li>Built reusable UI components, animations, and interactive frontend modules for production-ready projects.</li>
+            <li>Improved website performance and page responsiveness across desktop, tablet, and mobile devices.</li>
+            <li>Implemented SEO-friendly pages with schema markup, XML sitemaps, robots.txt, and metadata optimization.</li>
+            <li>Fixed UI/UX issues, browser compatibility bugs, and responsive design problems across multiple projects.</li>
+            <li>Collaborated with designers and backend developers using Git and GitHub for version control.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section id="projects" class="code-section wrap-wide">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › projects/</div>
+        <h2 class="filehead" style="margin-top:34px;">selected_work · 05 pens</h2>
+
+        <div class="pen-grid" style="margin-top:8px;">
+
+          <div class="pen">
+            <div class="pen-preview" style="background:linear-gradient(135deg,#1a2a4a,#0f3d5c);">
+              <div class="browser-dots"><i></i><i></i><i></i></div>
+              <span class="glyph">AOC</span>
+            </div>
+            <div class="pen-body">
+              <div class="pen-toprow">
+                <span class="pen-title">AOC Website</span>
+                <span class="pen-type" style="background:#0e3a5f;color:#4fc1ff;">Enterprise</span>
+              </div>
+              <div class="pen-stack">
+                <span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Bootstrap</span><span class="chip">JavaScript</span><span class="chip">React.js</span><span class="chip">Tailwind CSS</span>
+              </div>
+              <div class="pen-tabs">
+                <button class="pen-tabbtn active" data-panel="0-overview">Overview</button>
+                <button class="pen-tabbtn" data-panel="0-stack">Details</button>
+              </div>
+              <div class="pen-panel active" data-panel="0-overview">
+                <ul>
+                  <li>Developed responsive web pages across desktop, tablet, and mobile, covering all breakpoints cleanly.</li>
+                  <li>Implemented dark mode and light mode with appropriate image and UI component switching.</li>
+                </ul>
+              </div>
+              <div class="pen-panel" data-panel="0-stack">
+                <ul>
+                  <li>Improved multilingual responsiveness for both English and French versions of the site.</li>
+                  <li>Resolved UI audit issues and performed cross-browser compatibility fixes.</li>
+                </ul>
+              </div>
+              <div class="pen-footer">
+                <span class="pen-link disabled">↗ Live</span>
+                <span class="pen-link disabled">⑂ Private repo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pen">
+            <div class="pen-preview" style="background:linear-gradient(135deg,#2a1a4a,#5c1f5f);">
+              <div class="browser-dots"><i></i><i></i><i></i></div>
+              <span class="glyph">UNI</span>
+            </div>
+            <div class="pen-body">
+              <div class="pen-toprow">
+                <span class="pen-title">Unifi Website</span>
+                <span class="pen-type" style="background:#3a1f5f;color:#c586c0;">Landing Page</span>
+              </div>
+              <div class="pen-stack">
+                <span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Bootstrap</span><span class="chip">JavaScript</span><span class="chip">React.js</span>
+              </div>
+              <div class="pen-tabs">
+                <button class="pen-tabbtn active" data-panel="1-overview">Overview</button>
+                <button class="pen-tabbtn" data-panel="1-stack">Details</button>
+              </div>
+              <div class="pen-panel active" data-panel="1-overview">
+                <ul>
+                  <li>Built responsive landing pages with sticky navigation, interactive sections, and animations.</li>
+                  <li>Developed and maintained reusable UI components for layout consistency.</li>
+                </ul>
+              </div>
+              <div class="pen-panel" data-panel="1-stack">
+                <ul>
+                  <li>Integrated new design requirements based on client feedback.</li>
+                  <li>Fixed responsive and cross-browser issues.</li>
+                </ul>
+              </div>
+              <div class="pen-footer">
+                <span class="pen-link disabled">↗ Live</span>
+                <span class="pen-link disabled">⑂ Private repo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pen">
+            <div class="pen-preview" style="background:linear-gradient(135deg,#4a2a1a,#8a4a1f);">
+              <div class="browser-dots"><i></i><i></i><i></i></div>
+              <span class="glyph">GAB</span>
+            </div>
+            <div class="pen-body">
+              <div class="pen-toprow">
+                <span class="pen-title">Gift a Bottle</span>
+                <span class="pen-type" style="background:#5f3a1f;color:#ce9178;">Promo</span>
+              </div>
+              <div class="pen-stack">
+                <span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Bootstrap</span><span class="chip">JavaScript</span>
+              </div>
+              <div class="pen-tabs">
+                <button class="pen-tabbtn active" data-panel="2-overview">Overview</button>
+                <button class="pen-tabbtn" data-panel="2-stack">Details</button>
+              </div>
+              <div class="pen-panel active" data-panel="2-overview">
+                <ul>
+                  <li>Built responsive promotional landing pages with interactive UI elements and animations.</li>
+                </ul>
+              </div>
+              <div class="pen-panel" data-panel="2-stack">
+                <ul>
+                  <li>Optimized mobile responsiveness, browser compatibility, and frontend loading performance.</li>
+                </ul>
+              </div>
+              <div class="pen-footer">
+                <span class="pen-link disabled">↗ Live</span>
+                <span class="pen-link disabled">⑂ Private repo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pen">
+            <div class="pen-preview" style="background:linear-gradient(135deg,#1a4a2e,#1f8a5c);">
+              <div class="browser-dots"><i></i><i></i><i></i></div>
+              <span class="glyph">SPK</span>
+            </div>
+            <div class="pen-body">
+              <div class="pen-toprow">
+                <span class="pen-title">Sparkout Website</span>
+                <span class="pen-type" style="background:#1f5f3a;color:#3fb950;">SEO</span>
+              </div>
+              <div class="pen-stack">
+                <span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Bootstrap</span><span class="chip">JavaScript</span><span class="chip">SEO</span>
+              </div>
+              <div class="pen-tabs">
+                <button class="pen-tabbtn active" data-panel="3-overview">Overview</button>
+                <button class="pen-tabbtn" data-panel="3-stack">Details</button>
+              </div>
+              <div class="pen-panel active" data-panel="3-overview">
+                <ul>
+                  <li>Developed and maintained multiple SEO-optimized landing pages with structured data and schema markup.</li>
+                  <li>Implemented XML sitemaps and robots.txt site-wide.</li>
+                </ul>
+              </div>
+              <div class="pen-panel" data-panel="3-stack">
+                <ul>
+                  <li>Resolved Core Web Vitals and Lighthouse performance issues.</li>
+                  <li>Added animations and interactive components; collaborated with designers and backend developers.</li>
+                </ul>
+              </div>
+              <div class="pen-footer">
+                <a class="pen-link" href="https://www.sparkouttech.com/" target="_blank" rel="noopener">↗ Live</a>
+                <span class="pen-link disabled">⑂ Private repo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pen">
+            <div class="pen-preview" style="background:linear-gradient(135deg,#2a1a1a,#5f1f1f);">
+              <div class="browser-dots"><i></i><i></i><i></i></div>
+              <span class="glyph">BCX</span>
+            </div>
+            <div class="pen-body">
+              <div class="pen-toprow">
+                <span class="pen-title">BlockchainX</span>
+                <span class="pen-type" style="background:#5f1f2f;color:#f47174;">Web3</span>
+              </div>
+              <div class="pen-stack">
+                <span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Bootstrap</span><span class="chip">JavaScript</span>
+              </div>
+              <div class="pen-tabs">
+                <button class="pen-tabbtn active" data-panel="4-overview">Overview</button>
+                <button class="pen-tabbtn" data-panel="4-stack">Details</button>
+              </div>
+              <div class="pen-panel active" data-panel="4-overview">
+                <ul>
+                  <li>Developed responsive UI components and landing pages following modern design principles.</li>
+                </ul>
+              </div>
+              <div class="pen-panel" data-panel="4-stack">
+                <ul>
+                  <li>Built reusable frontend sections; fixed cross-browser compatibility and responsive issues.</li>
+                  <li>Implemented UI animations and layout optimizations for improved performance.</li>
+                </ul>
+              </div>
+              <div class="pen-footer">
+                <a class="pen-link" href="https://www.blockchainx.tech/" target="_blank" rel="noopener">↗ Live</a>
+                <span class="pen-link disabled">⑂ Private repo</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SKILLS -->
+      <section id="skills" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › skills.css</div>
+        <h2 class="filehead" style="margin-top:34px;">:root { }</h2>
+
+        <div class="line"><div class="line-content"><span class="tagv">:root</span> <span class="punct">{</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="cm">/* Languages */</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="varv">--languages</span><span class="punct">:</span> <span class="str">HTML5, CSS3, JavaScript (ES6+), TypeScript (Basic)</span><span class="punct">;</span></div></div>
+        <div class="line-empty"><div class="line-content"></div></div>
+        <div class="line indent"><div class="line-content"><span class="cm">/* Frameworks & Libraries */</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="varv">--frameworks</span><span class="punct">:</span> <span class="str">React.js, Next.js, Bootstrap 5, Tailwind CSS</span><span class="punct">;</span></div></div>
+        <div class="line-empty"><div class="line-content"></div></div>
+        <div class="line indent"><div class="line-content"><span class="cm">/* Frontend Expertise */</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="varv">--expertise</span><span class="punct">:</span> <span class="str">Responsive Web Design, Mobile-First Development, Schema Markup, SEO Optimization</span><span class="punct">;</span></div></div>
+        <div class="line-empty"><div class="line-content"></div></div>
+        <div class="line indent"><div class="line-content"><span class="cm">/* Tools & Platforms */</span></div></div>
+        <div class="line indent"><div class="line-content"><span class="varv">--tools</span><span class="punct">:</span> <span class="str">Git, GitHub, VS Code, Figma</span><span class="punct">;</span></div></div>
+        <div class="line"><div class="line-content"><span class="punct">}</span></div></div>
+
+        <div class="skills-card" style="margin-top:26px;">
+          <div class="skill-row"><span class="sel">.languages</span><div class="hero-tags"><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">JavaScript ES6+</span><span class="tag">TypeScript</span></div></div>
+          <div class="skill-row"><span class="sel">.frameworks</span><div class="hero-tags"><span class="tag">React.js</span><span class="tag">Next.js</span><span class="tag">Bootstrap 5</span><span class="tag">Tailwind CSS</span></div></div>
+          <div class="skill-row"><span class="sel">.expertise</span><div class="hero-tags"><span class="tag">Responsive Design</span><span class="tag">Mobile-First</span><span class="tag">Schema Markup</span><span class="tag">SEO</span></div></div>
+          <div class="skill-row"><span class="sel">.tools</span><div class="hero-tags"><span class="tag">Git</span><span class="tag">GitHub</span><span class="tag">VS Code</span><span class="tag">Figma</span></div></div>
+        </div>
+      </section>
+
+      <!-- AWARDS -->
+      <section id="awards" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › awards.yaml</div>
+        <h2 class="filehead" style="margin-top:34px;">awards:</h2>
+
+        <div class="award-block">
+          <div class="line"><div class="line-content"><span class="punct">-</span> <span class="varv">title</span><span class="punct">:</span> <span class="award-title">Employee of the First Quarter</span><span class="award-badge">★ Q1 2026</span></div></div>
+          <div class="line indent"><div class="line-content"><span class="varv">org</span><span class="punct">:</span> <span class="str">Sparkout Tech Solutions</span></div></div>
+          <div class="line indent"><div class="line-content"><span class="varv">note</span><span class="punct">:</span> <span class="prose" style="display:inline;">Recognized for outstanding performance and contributions during the first quarter of 2026.</span></div></div>
+        </div>
+
+        <div class="award-block">
+          <div class="line"><div class="line-content"><span class="punct">-</span> <span class="varv">title</span><span class="punct">:</span> <span class="award-title">Sparkout Hackathon</span><span class="award-badge" style="background:#c0c0c0;">🥈 2nd Prize</span></div></div>
+          <div class="line indent"><div class="line-content"><span class="varv">org</span><span class="punct">:</span> <span class="str">Sparkout Tech Solutions — Internal Hackathon</span></div></div>
+          <div class="line indent"><div class="line-content"><span class="varv">note</span><span class="punct">:</span> <span class="prose" style="display:inline;">Participated in the internal hackathon and won 2nd Prize.</span></div></div>
+        </div>
+      </section>
+
+      <!-- EDUCATION -->
+      <section id="education" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › education.txt</div>
+        <h2 class="filehead" style="margin-top:34px;">credentials</h2>
+        <div class="edu-row">
+          <div>
+            <div class="edu-degree">Bachelor of Engineering — Biomedical Engineering</div>
+            <div class="edu-school">Dr. N.G.P. Institute of Technology, Coimbatore</div>
+          </div>
+          <div class="edu-year">Graduated 2024</div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section id="contact" class="code-section wrap">
+        <div class="breadcrumb"><b>kishore-s-portfolio</b> › contact.sh</div>
+        <h2 class="filehead" style="margin-top:34px;">./contact.sh</h2>
+
+        <div class="terminal-box">
+          <div class="term-bar">● bash — kishore@sparkout: ~/portfolio</div>
+          <div class="term-body">
+            <div class="term-out-line"><span class="kw">$</span> <span>echo "Let's build something that fits every screen."</span></div>
+            <div class="term-out-line" style="margin-top:14px;"><span class="k">EMAIL</span><span class="punct">=</span><span class="v">kishore55440@gmail.com</span> <button class="copy-btn" id="copyEmail">copy</button> <span class="copied-note" id="copiedNote">✓ copied</span></div>
+            <div class="term-out-line"><span class="k">PHONE</span><span class="punct">=</span><span class="v">+91 9344031277</span></div>
+            <div class="term-out-line"><span class="k">LOCATION</span><span class="punct">=</span><span class="v">Tiruppur, Tamil Nadu, India</span></div>
+            <div class="term-out-line"><span class="k">STATUS</span><span class="punct">=</span><span class="v" style="color:var(--green-status);">open_to_work</span></div>
+
+            <div class="contact-links">
+              <a class="btn btn-primary" href="mailto:kishore55440@gmail.com">✉ Email Me</a>
+              <a class="btn btn-ghost" href="https://www.linkedin.com/in/kishore8" target="_blank" rel="noopener">🔗 LinkedIn</a>
+              <a class="btn btn-ghost" href="https://github.com/kishoreSparkout" target="_blank" rel="noopener">⌥ GitHub</a>
+              <a class="btn btn-ghost" href="tel:+919344031277">✆ Call</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot wrap">
+        <p>Designed & Developed by Kishore S • Built with HTML, CSS & JavaScript • Inspired by VS Code.</p>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <div class="sb-left">
+    <span class="sb-item">⑂ main</span>
+    <span class="sb-item sb-hide-mobile">✓ 0 problems</span>
+    <span class="sb-item" id="sbFile">about.md</span>
+  </div>
+  <div class="sb-right">
+    <span class="sb-item sb-hide-mobile">UTF-8</span>
+    <span class="sb-item sb-hide-mobile">LF</span>
+    <span class="sb-item" id="sbWidth">— px</span>
+    <span class="sb-item"><span class="pulse"></span>Open to opportunities</span>
+  </div>
+</div>
+
+<script>
+  // Sidebar drawer (mobile)
+  (function(){
+    const btn = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    btn.addEventListener('click', () => {
+      const open = sidebar.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    });
+    document.querySelectorAll('.navfile').forEach(a => a.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      btn.setAttribute('aria-expanded', false);
+    }));
+  })();
+
+  // Scrollspy: highlight active file in sidebar + tabbar + status bar
+  (function(){
+    const sections = document.querySelectorAll('.code-section[id]');
+    const navfiles = document.querySelectorAll('.navfile[data-target]');
+    const tabs = document.querySelectorAll('.tab[data-target]');
+    const sbFile = document.getElementById('sbFile');
+    const fileNames = {
+      about:'about.md', experience:'experience.json', projects:'projects/',
+      skills:'skills.css', awards:'awards.yaml', education:'education.txt', contact:'contact.sh'
+    };
+    if (!('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          navfiles.forEach(n => n.classList.toggle('active', n.dataset.target === id));
+          tabs.forEach(t => t.classList.toggle('active', t.dataset.target === id));
+          if (sbFile && fileNames[id]) sbFile.textContent = fileNames[id];
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    sections.forEach(s => io.observe(s));
+  })();
+
+  // Status bar live viewport width
+  (function(){
+    const el = document.getElementById('sbWidth');
+    function update(){ el.textContent = window.innerWidth + ' px'; }
+    update();
+    window.addEventListener('resize', update);
+  })();
+
+  // Typewriter line in hero
+  (function(){
+    const el = document.getElementById('typewriter');
+    const text = '// Transforming ideas into responsive React applications with clean code and optimized user experiences.';
+    let i = 0;
+    function type(){
+      if (i <= text.length) {
+        el.innerHTML = text.slice(0, i) + '<span class="caret"></span>';
+        i++;
+        setTimeout(type, 22);
+      }
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.innerHTML = text;
+    } else {
+      type();
+    }
+  })();
+
+  // Copy email
+  (function(){
+    const btn = document.getElementById('copyEmail');
+    const note = document.getElementById('copiedNote');
+    btn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText('kishore55440@gmail.com');
+        note.classList.add('show');
+        setTimeout(() => note.classList.remove('show'), 1600);
+      }catch(e){
+        window.location.href = 'mailto:kishore55440@gmail.com';
+      }
+    });
+  })();
+
+  // Pen card tab switching (Overview / Details)
+  (function(){
+    document.querySelectorAll('.pen').forEach(pen => {
+      const btns = pen.querySelectorAll('.pen-tabbtn');
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.panel;
+          pen.querySelectorAll('.pen-tabbtn').forEach(b => b.classList.remove('active'));
+          pen.querySelectorAll('.pen-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          pen.querySelector('.pen-panel[data-panel="' + key + '"]').classList.add('active');
+        });
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
